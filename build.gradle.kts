@@ -1,25 +1,25 @@
-val javaVersion = 17 // Minecraft 1.18 requires Java 17
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.21"
-    id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
     `java-library`
+    kotlin("jvm") version "1.6.21"
+    id("io.papermc.paperweight.userdev") version "1.3.6"
+    id("xyz.jpenilla.run-paper") version "1.0.6"
+    id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
 }
 
-val mcVersion = "1.17.1"
 group = "de.hglabor"
-version = "${mcVersion}_v1"
+version = "1.18.2_v1"
+
+val javaVersion = 17 // Minecraft 1.18 requires Java 17
 
 repositories {
     mavenCentral()
-    mavenLocal()
-    maven("https://papermc.io/repo/repository/maven-public/")
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT")
-    compileOnly("org.bukkit:craftbukkit:${mcVersion}-R0.1-SNAPSHOT") //bitte lasst mich in ruhe ganz traurig
-    compileOnly("net.axay:kspigot:1.17.4")
+    paperDevBundle("1.18.2-R0.1-SNAPSHOT")
+    compileOnly("net.axay:kspigot:1.18.2")
 }
 
 configure<SourceSetContainer> {
@@ -28,13 +28,21 @@ configure<SourceSetContainer> {
     }
 }
 
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
+}
+
 tasks {
-    compileKotlin {
+    assemble {
+        dependsOn(reobfJar)
+    }
+
+    withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "$javaVersion"
         }
     }
-    compileJava {
+    withType<JavaCompile> {
         options.encoding = "UTF-8"
         options.release.set(javaVersion)
     }
@@ -43,13 +51,13 @@ tasks {
 
 bukkit {
     name = "maze-generator"
-    apiVersion = "1.17"
+    apiVersion = "1.18"
     authors = listOf(
         "Your Name",
     )
     main = "$group.mazegenerator.MazeGenerator"
     version = getVersion().toString()
     libraries = listOf(
-        "net.axay:kspigot:1.17.4",
+        "net.axay:kspigot:1.18.2",
     )
 }
